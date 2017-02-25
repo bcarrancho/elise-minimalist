@@ -9,6 +9,7 @@ import json
 import zlib
 import time
 import logging
+import socket
 
 import cassiopeia.type.api.exception
 import cassiopeia.type.api.rates
