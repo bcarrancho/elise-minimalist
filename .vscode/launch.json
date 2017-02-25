@@ -7,11 +7,12 @@
             "request": "launch",
             "stopOnEntry": true,
             "pythonPath": "${config.python.pythonPath}",
-            "program": "${workspaceRoot}/elise_start.py",
+            "program": "${workspaceRoot}/elstart.py",
             "cwd": "${workspaceRoot}",
             "args": [
                 "-r",
-                "EUW"
+                "EUW",
+                "-v"
             ],
             "debugOptions": [
                 "WaitOnAbnormalExit",

@@ -46,7 +46,7 @@ class FlushMatchThread(threading.Thread):
                 logging.debug("flushed match #{match_id}".format(match_id=match_id))
 
                 # Discover new summoners
-                participants = match.get("participants", [])
+                participants = match.get("participantIdentities", [])
                 players = [participant.get("player", None) for participant in participants]
                 summoner_ids = [player.get("summonerId", None) for player in players if player is not None]
                 discovery_summoners = [int(summoner_id) for summoner_id in summoner_ids if summoner_id is not None]
