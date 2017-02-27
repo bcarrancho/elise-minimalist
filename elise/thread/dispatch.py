@@ -52,7 +52,7 @@ class DispatchMatchThread(threading.Thread):
     
     def dispatch(self, conn, n):
         start_time = time.time()
-        c = conn.execute('SELECT "matchId" FROM "MatchDiscovered" WHERE "matchId" NOT IN (SELECT "matchId" FROM "MatchQueued") AND "matchId" NOT IN (SELECT "matchId" FROM "MatchFlushed") ORDER BY "matchId" LIMIT (?);', (n,))
+        c = conn.execute('SELECT "matchId" FROM "MatchDiscovered" WHERE "matchId" NOT IN (SELECT "matchId" FROM "MatchQueued") AND "matchId" NOT IN (SELECT "matchId" FROM "MatchFlushed") ORDER BY "matchId" DESC LIMIT (?);', (n,))
         dispatched_matches = [match_id[0] for match_id in c.fetchall()]
         count = len(dispatched_matches)
         if count > 0:

@@ -6,14 +6,9 @@
             "type": "python",
             "request": "launch",
             "stopOnEntry": true,
-            "pythonPath": "${config.python.pythonPath}",
-            "program": "${workspaceRoot}/elstart.py",
+            "pythonPath": "${workspaceRoot}/venv-elise",
+            "program": "${workspaceRoot}/tools/jsontodb.py",
             "cwd": "${workspaceRoot}",
-            "args": [
-                "-r",
-                "EUW",
-                "-v"
-            ],
             "debugOptions": [
                 "WaitOnAbnormalExit",
                 "WaitOnNormalExit",
