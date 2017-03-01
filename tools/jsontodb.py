@@ -9,8 +9,7 @@ import cassiopeia.type.api.store
 import cassiopeia.type.dto.match
 import cassiopeia.type.core.match
 
-#regions = ["BR", "EUNE", "EUW", "JP", "KR", "LAN", "LAS", "NA", "OCE", "RU", "TR"]
-regions = ["OCE"]
+regions = ["BR", "EUNE", "EUW", "JP", "KR", "LAN", "LAS", "NA", "OCE", "RU", "TR"]
 
 folder_data = pathlib.Path('.', 'data')
 
