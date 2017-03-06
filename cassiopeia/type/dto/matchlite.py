@@ -150,8 +150,8 @@ class Participant(cassiopeia.type.dto.common.CassiopeiaDto):
         val = dictionary.get("stats", None)
         self.stats = ParticipantStats(val) if val and not isinstance(val, ParticipantStats) else val
         self.teamId = dictionary.get("teamId", 0)
-        #val = dictionary.get("timeline", None)
-        #self.timeline = ParticipantTimeline(val) if val and not isinstance(val, ParticipantTimeline) else val
+        val = dictionary.get("timeline", None)
+        self.timeline = ParticipantTimeline(val) if val and not isinstance(val, ParticipantTimeline) else val
 
 
 @cassiopeia.type.core.common.inheritdocs

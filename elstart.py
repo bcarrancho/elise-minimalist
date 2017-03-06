@@ -37,12 +37,12 @@ def main(parameters):
     folder_data = pathlib.Path('.', 'data')
     folder_region = pathlib.Path(folder_data, region.lower())
     folder_db = pathlib.Path(folder_region, 'database')
-    folder_json = pathlib.Path(folder_region, 'json')
+    folder_json_match = pathlib.Path(folder_region, 'json-match')
     try:
         folder_data.mkdir(exist_ok=True)
         folder_region.mkdir(exist_ok=True)
         folder_db.mkdir(exist_ok=True)
-        folder_json.mkdir(exist_ok=True)
+        folder_json_match.mkdir(exist_ok=True)
     except OSError:
         logging.error("Failed to create folder structure")
         sys.exit(3)
@@ -69,7 +69,7 @@ def main(parameters):
     thread_dispatch_match = elise.thread.dispatch.DispatchMatchThread(pipe, str(filename_dbd_match))
     thread_dispatch_match.start()
 
-    thread_flush_match = elise.thread.flush.FlushMatchThread(pipe, folder_json)
+    thread_flush_match = elise.thread.flush.FlushMatchThread(pipe, folder_json_match)
     thread_flush_match.start()
 
     thread_request = elise.thread.request.RequestThread(pipe, cold_start=cold_start)

@@ -45,7 +45,7 @@ if args.notimeline:
 
 folder_region = pathlib.Path(folder_data, region.lower())
 folder_db = pathlib.Path(folder_region, 'database')
-folder_json = pathlib.Path(folder_region, 'json')
+folder_json_match = pathlib.Path(folder_region, 'json-match')
 filename_db = pathlib.Path(folder_db, 'db-main-matches-' + region.lower() + '.sqlite')
 
 db_qualifier = ("sqlite", "", str(filename_db), "", "")
@@ -57,7 +57,7 @@ except IOError:
     sys.exit(3)
 
 count = 0
-for file in folder_json.iterdir():
+for file in folder_json_match.iterdir():
     if file.match('*.json.gz') and file.is_file():
         count += 1
 
@@ -67,7 +67,7 @@ if nummatches is not None and count > nummatches:
 print("Processing {count} matches".format(count=count))
 
 current = 1
-for file in folder_json.iterdir():
+for file in folder_json_match.iterdir():
     if file.match('*.json.gz') and file.is_file():
         print("Processing match {current}/{count} ({perc:.0f}%)".format(current=current, count=count, perc=(current*100/count)), end="\r")
         with gzip.GzipFile(file, 'r') as infile:
