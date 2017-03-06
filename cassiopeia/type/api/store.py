@@ -6,6 +6,7 @@ if cassiopeia.type.dto.common.sqlalchemy_imported:
     import sqlalchemy
     import sqlalchemy.orm
 
+timeline = True
 
 class DataStore(object):
     """
@@ -320,7 +321,10 @@ def _sa_bind_typesystem():
     import cassiopeia.type.dto.featuredgames
     import cassiopeia.type.dto.game
     import cassiopeia.type.dto.league
-    import cassiopeia.type.dto.match
+    if timeline:
+        import cassiopeia.type.dto.match
+    else:
+        import cassiopeia.type.dto.matchlite
     import cassiopeia.type.dto.matchlist
     import cassiopeia.type.dto.staticdata
     import cassiopeia.type.dto.stats
@@ -334,7 +338,10 @@ def _sa_bind_typesystem():
     cassiopeia.type.dto.featuredgames._sa_bind_all()
     cassiopeia.type.dto.game._sa_bind_all()
     cassiopeia.type.dto.league._sa_bind_all()
-    cassiopeia.type.dto.match._sa_bind_all()
+    if timeline:
+        cassiopeia.type.dto.match._sa_bind_all()
+    else:
+        cassiopeia.type.dto.matchlite._sa_bind_all()
     cassiopeia.type.dto.matchlist._sa_bind_all()
     cassiopeia.type.dto.staticdata._sa_bind_all()
     cassiopeia.type.dto.stats._sa_bind_all()
@@ -349,7 +356,10 @@ def _sa_bind_typesystem():
     import cassiopeia.type.core.featuredgames
     import cassiopeia.type.core.game
     import cassiopeia.type.core.league
-    import cassiopeia.type.core.match
+    if timeline:
+        import cassiopeia.type.core.match
+    else:
+        import cassiopeia.type.core.matchlite
     import cassiopeia.type.core.matchlist
     import cassiopeia.type.core.staticdata
     import cassiopeia.type.core.stats
@@ -363,7 +373,10 @@ def _sa_bind_typesystem():
     cassiopeia.type.core.featuredgames._sa_rebind_all()
     cassiopeia.type.core.game._sa_rebind_all()
     cassiopeia.type.core.league._sa_rebind_all()
-    cassiopeia.type.core.match._sa_rebind_all()
+    if timeline:
+        cassiopeia.type.core.match._sa_rebind_all()
+    else:
+        cassiopeia.type.core.matchlite._sa_rebind_all()
     cassiopeia.type.core.matchlist._sa_rebind_all()
     cassiopeia.type.core.staticdata._sa_rebind_all()
     cassiopeia.type.core.stats._sa_rebind_all()
