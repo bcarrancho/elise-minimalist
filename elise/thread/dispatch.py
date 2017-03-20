@@ -29,7 +29,7 @@ class DispatchMatchThread(threading.Thread):
 
     REQUEST_MATCH_QUEUE_SIZE = 600
     REQUEST_MATCH_QUEUE_THRESHOLD = 500
-    FLUSH_MATCHLISTS = 5
+    FLUSH_MATCHLISTS = 3
     SLEEP_TIME = 5
 
     def __init__(self, pipe, dbd_match_filename):
@@ -241,10 +241,10 @@ class DispatchMatchlistThread(threading.Thread):
     def flush(self, conn, tokens):
         logging.debug("Flushing matchlists...")
         start_time = time.time()
-        summoners = [(t.summonerId, t.timestamp) for t in tokens]
+        summoners = [(t.summonerId, t.timestamp, t.matchCount) for t in tokens]
         summoner_ids = [(t.summonerId,) for t in tokens]
         conn.execute('BEGIN')
-        c1 = conn.executemany('INSERT INTO "MatchlistFlushed" VALUES (?, ?);', summoners)
+        c1 = conn.executemany('INSERT INTO "MatchlistFlushed" VALUES (?, ?, ?);', summoners)
         count_inserted = c1.rowcount
         c2 = conn.executemany('DELETE FROM "MatchlistQueued" WHERE "summonerId" = (?)', summoner_ids)
         count_deleted = c1.rowcount

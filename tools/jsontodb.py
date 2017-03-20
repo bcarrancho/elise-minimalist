@@ -14,7 +14,7 @@ import cassiopeia.type.core.matchlite
 
 VALID_REGIONS = ("BR", "EUNE", "EUW", "JP", "KR", "LAN", "LAS", "NA", "OCE", "RU", "TR")
 folder_data = pathlib.Path('.', 'data')
-BATCH_SIZE = 1000
+BATCH_SIZE = 900
 
 # Argument parsing
 try:
@@ -67,22 +67,40 @@ if nummatches is not None and count > nummatches:
 print("Processing {count} matches".format(count=count))
 
 current = 1
+batch_json = []
 for file in folder_json_match.iterdir():
     if file.match('*.json.gz') and file.is_file():
-        print("Processing match {current}/{count} ({perc:.0f}%)".format(current=current, count=count, perc=(current*100/count)), end="\r")
+        print("Processing match {current}/{count} ({perc:.0f}%)".format(current=current, count=count, perc=(current*100/count)))
         with gzip.GzipFile(file, 'r') as infile:
             match_json = json.load(infile)
-    
-        if args.notimeline:
-            match_dto = cassiopeia.type.dto.matchlite.MatchDetail(match_json)
-            match = cassiopeia.type.core.matchlite.Match(match_dto)
-        else:
-            match = cassiopeia.type.core.match.Match(cassiopeia.type.dto.match.MatchDetail(match_json))
+            batch_json.append(match_json)
 
-        db.store(match)
+        if len(batch_json) >= BATCH_SIZE:
+            if args.notimeline:
+                match_list = [cassiopeia.type.core.matchlite.Match(cassiopeia.type.dto.matchlite.MatchDetail(match_json)) for match_json in batch_json]
+            else:
+                match_list = [cassiopeia.type.core.match.Match(cassiopeia.type.dto.match.MatchDetail(match_json)) for match_json in batch_json]
+            print("flushing {} matches to database...".format(len(batch_json)))
+
+            #db.store(match_list)
+            db.session.bulk_save_objects(match_list)
+
+            batch_json = []
         if nummatches is not None and current >= nummatches:
             break
         current += 1
+
+if len(batch_json):
+    if args.notimeline:
+        #match_list = [cassiopeia.type.core.matchlite.Match(cassiopeia.type.dto.matchlite.MatchDetail(match_json)) for match_json in batch_json]
+        match_dto_list = [cassiopeia.type.dto.matchlite.MatchDetail(match_json) for match_json in batch_json]
+    else:
+        #match_list = [cassiopeia.type.core.match.Match(cassiopeia.type.dto.match.MatchDetail(match_json)) for match_json in batch_json]
+        match_dto_list = [cassiopeia.type.dto.match.MatchDetail(match_json) for match_json in batch_json]
+    print("flushing {} matches to database...".format(len(batch_json)))
+
+    #db.store(match_list)
+    db.session.bulk_save_objects(match_dto_list)
 
 db.close()
 print("Done")

@@ -3,6 +3,7 @@ import time
 import logging
 import enum
 import queue
+import json
 
 import cassiopeia.dto.matchapi
 import cassiopeia.dto.matchlistapi
@@ -20,7 +21,7 @@ class RequestMode(enum.Enum):
 class RequestThread(threading.Thread):
 
     MATCH_BATCH = 10
-    MATCHLIST_BATCH = 1
+    MATCHLIST_BATCH = 3
     MATCHLIST_MAX_ELAPSED_DAYS = 0
 
     def __init__(self, pipe, include_timeline=True, num_matches=0, begin_index=0, begin_time=0, end_time=0, champion_ids=None, ranked_queues=None, seasons=None, cold_start=False):
@@ -62,7 +63,8 @@ class RequestThread(threading.Thread):
                     logging.warning("HTTP error {error} while trying to get match #{match_id}".format(error=e.error_code, match_id=match_id))
                     self.pipe.request_match.task_done()
                     continue
-                logging.info("Retrieved match #{match_id} (req: {request_time:.1f}s / ovh: {request_overhead:.1f}s)".format(match_id=match_id, request_time=request_time, request_overhead=request_overhead))
+                match_age = (time.time() - (int(json.loads(match_json)["matchCreation"]) / 1000)) / (60 * 60 * 24)
+                logging.info("Retrieved match #{match_id} (req: {request_time:.1f}s / ovh: {request_overhead:.1f}s / age: {age:.1f}d)".format(match_id=match_id, request_time=request_time, request_overhead=request_overhead, age=match_age))
                 if match_json is not None:
                     self.pipe.flush_match.put(match_json)
                     self.match_counter += 1

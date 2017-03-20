@@ -2,13 +2,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python",
+            "name": "Run elise (OCE)",
             "type": "python",
             "request": "launch",
             "stopOnEntry": true,
-            "pythonPath": "${workspaceRoot}/venv-elise",
-            "program": "${workspaceRoot}/tools/jsontodb.py",
-            "cwd": "${workspaceRoot}",
+            "pythonPath": "/Users/bruno/Documents/elise-minimalist/venv-elise/bin/python",
+            "program": "${workspaceRoot}/elstart.py",
+            "cwd": "/Users/bruno/Documents/elise-minimalist",
+            "args": [
+                "-r",
+                "OCE"
+            ],
             "debugOptions": [
                 "WaitOnAbnormalExit",
                 "WaitOnNormalExit",

@@ -94,7 +94,8 @@ def make_request(request, method, params={}, payload=None, static=False, include
     try:
         content = limiter.call(execute_request, url, method, payload) if limiter else execute_request(url, method, payload)
         enhanced_result = json.loads(content) if content else {}
-        enhanced_result["_jsonRawResponse"] = content
+        if isinstance(enhanced_result, dict):
+            enhanced_result["_jsonRawResponse"] = content
         return enhanced_result
     except urllib.error.HTTPError as e:
         # Reset rate limiter and retry on 429 (rate limit exceeded)

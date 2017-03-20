@@ -1,0 +1,106 @@
+Last login: Tue Mar  7 01:13:29 on ttys011
+eduroamstud-130-82-254-149:~ bruno$ cd Documents/
+eduroamstud-130-82-254-149:Documents bruno$ cd elise-minimalist
+eduroamstud-130-82-254-149:elise-minimalist bruno$ source venv-elise/bin/activate
+(venv-elise) eduroamstud-130-82-254-149:elise-minimalist bruno$ python
+Python 3.6.0 (v3.6.0:41df79263a11, Dec 22 2016, 17:23:13) 
+[GCC 4.2.1 (Apple Inc. build 5666) (dot 3)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import pathlib
+>>> import gzip
+>>> import json
+>>> import cassiopeia
+>>> import cassiopeia.baseriotapi
+>>> import cassiopeia.dto.matchlistapi
+>>> import cassiopeia.type.dto.matchlist
+>>> import sqlite3
+>>> from elise.api.retry import *
+>>> import os
+>>> import sys
+>>> region = "KR"
+>>> key = os.environ["DEV_KEY"]
+>>> key
+'RGAPI-daa4d889-3176-4503-868b-93278e5938ad'
+>>> cassiopeia.baseriotapi.set_r
+cassiopeia.baseriotapi.set_rate_limit(  cassiopeia.baseriotapi.set_rate_limits( cassiopeia.baseriotapi.set_region(     
+>>> cassiopeia.baseriotapi.set_region(region)
+>>> cassiopeia.baseriotapi.set_api_key(key)
+>>>     folder_data = pathlib.Path('.', 'data')
+  File "<stdin>", line 1
+    folder_data = pathlib.Path('.', 'data')
+    ^
+IndentationError: unexpected indent
+>>>     folder_region = pathlib.Path(folder_data, region.lower())
+  File "<stdin>", line 1
+    folder_region = pathlib.Path(folder_data, region.lower())
+    ^
+IndentationError: unexpected indent
+>>>     folder_db = pathlib.Path(folder_region, 'database')
+  File "<stdin>", line 1
+    folder_db = pathlib.Path(folder_region, 'database')
+    ^
+IndentationError: unexpected indent
+>>> folder_data = pathlib.Path('.', 'data')
+>>> folder_region = pathlib.Path(folder_data, region.lower())
+>>> folder_db = pathlib.Path(folder_region, 'database')
+>>> folder_json_matchlist = pathlib.Path(folder_region, 'json-matchlist')
+>>>     filename_dbd_match = pathlib.Path(folder_db, "db-discovery-match-" + region.lower() + ".sqlite")
+  File "<stdin>", line 1
+    filename_dbd_match = pathlib.Path(folder_db, "db-discovery-match-" + region.lower() + ".sqlite")
+    ^
+IndentationError: unexpected indent
+>>>     filename_dbd_matchlist = pathlib.Path(folder_db, "db-discovery-matchlist-" + region.lower() + ".sqlite")
+  File "<stdin>", line 1
+    filename_dbd_matchlist = pathlib.Path(folder_db, "db-discovery-matchlist-" + region.lower() + ".sqlite")
+    ^
+IndentationError: unexpected indent
+>>> filename_dbd_match = pathlib.Path(folder_db, "db-discovery-match-" + region.lower() + ".sqlite")
+>>> filename_dbd_matchlist = pathlib.Path(folder_db, "db-discovery-matchlist-" + region.lower() + ".sqlite")
+>>> summoners = >>> 
+>>> 
+>>> conn = sqlite3.connect(conn_dbd_matchlist = sqlite3.connect(self.dbd_matchlist_filename)
+... 
+... )
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'self' is not defined
+>>> conn_dbd_matchlist = sqlite3.connect(filename_dbd_matchlist)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+TypeError: argument 1 must be str, not PosixPath
+>>> conn_dbd_matchlist = sqlite3.connect(str(filename_dbd_matchlist))
+>>> query_result = conn_dbd_matchlist.execute("SELECT summonerId FROM MatchlistDiscovered")
+>>> query_result = conn_dbd_matchlist.execute("SELECT summonerId FROM MatchlistDiscovered LIMIT 1000")
+>>> list_summoners = [s[0] for s in query_result]
+>>> list_summoners[0]
+2435941
+>>> list_summoners[1]
+3855442
+>>> conn_dbd_matchlist.c
+conn_dbd_matchlist.close(            conn_dbd_matchlist.create_aggregate( conn_dbd_matchlist.create_function( 
+conn_dbd_matchlist.commit(           conn_dbd_matchlist.create_collation( conn_dbd_matchlist.cursor(          
+>>> conn_dbd_matchlist.c
+conn_dbd_matchlist.close(            conn_dbd_matchlist.create_aggregate( conn_dbd_matchlist.create_function( 
+conn_dbd_matchlist.commit(           conn_dbd_matchlist.create_collation( conn_dbd_matchlist.cursor(          
+>>> conn_dbd_matchlist.close()
+>>> for s in list_summoners:
+...     ml = cassiopeia.dto.matchlistapi.get(s)
+... 
+Traceback (most recent call last):
+  File "<stdin>", line 2, in <module>
+AttributeError: module 'cassiopeia.dto.matchlistapi' has no attribute 'get'
+>>> for s in list_summoners:
+...     pass
+... 
+>>> cassiopeia.baseriotapi.print_calls(False)
+>>> cassiopeia.baseriotapi.print_calls(True)
+>>> matchlists = []
+>>> for s in list_summoners:
+...     matchlists.append(cassiopeia.dto.matchlistapi.get_match_list(s))
+
+>>> for i, ml in enumerate(matchlists):
+...     summoner_id = list_summoners[i]
+...     filename_json = pathlib.Path(folder_json_matchlist, 'ml-' + str(summoner_id) + '.json.gz')
+...     with gzip.GzipFile(str(filename_json), 'w') as outfile:
+...             outfile.write(ml.to_json().encode('utf-8'))
+... 

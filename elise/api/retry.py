@@ -9,6 +9,7 @@ import urllib.error
 from cassiopeia.dto.leagueapi import *
 from cassiopeia.dto.matchapi import *
 from cassiopeia.dto.matchlistapi import *
+from cassiopeia.dto.staticdataapi import *
 
 exit = False
 
@@ -70,3 +71,15 @@ cassiopeia.dto.leagueapi.get_master = auto_retry(cassiopeia.dto.leagueapi.get_ma
 cassiopeia.dto.matchapi.get_match = auto_retry(cassiopeia.dto.matchapi.get_match)
 cassiopeia.dto.matchapi.get_tournament_match_ids = auto_retry(cassiopeia.dto.matchapi.get_tournament_match_ids)
 cassiopeia.dto.matchlistapi.get_match_list = auto_retry(cassiopeia.dto.matchlistapi.get_match_list)
+cassiopeia.dto.staticdataapi.get_champion = auto_retry(cassiopeia.dto.staticdataapi.get_champion)
+cassiopeia.dto.staticdataapi.get_champions = auto_retry(cassiopeia.dto.staticdataapi.get_champions)
+cassiopeia.dto.staticdataapi.get_item = auto_retry(cassiopeia.dto.staticdataapi.get_item)
+cassiopeia.dto.staticdataapi.get_items = auto_retry(cassiopeia.dto.staticdataapi.get_items)
+cassiopeia.dto.staticdataapi.get_language_strings = auto_retry(cassiopeia.dto.staticdataapi.get_language_strings)
+cassiopeia.dto.staticdataapi.get_languages = auto_retry(cassiopeia.dto.staticdataapi.get_languages)
+cassiopeia.dto.staticdataapi.get_maps = auto_retry(cassiopeia.dto.staticdataapi.get_maps)
+cassiopeia.dto.staticdataapi.get_masteries = auto_retry(cassiopeia.dto.staticdataapi.get_masteries)
+cassiopeia.dto.staticdataapi.get_mastery = auto_retry(cassiopeia.dto.staticdataapi.get_mastery)
+cassiopeia.dto.staticdataapi.get_realm = auto_retry(cassiopeia.dto.staticdataapi.get_realm)
+cassiopeia.dto.staticdataapi.get_rune = auto_retry(cassiopeia.dto.staticdataapi.get_rune)
+cassiopeia.dto.staticdataapi.get_runes = auto_retry(cassiopeia.dto.staticdataapi.get_runes)

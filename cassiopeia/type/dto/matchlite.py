@@ -36,15 +36,18 @@ class MatchDetail(cassiopeia.type.dto.common.CassiopeiaDto):
         self.matchMode = dictionary.get("matchMode", "")
         self.matchType = dictionary.get("matchType", "")
         self.matchVersion = dictionary.get("matchVersion", "")
-        self.participantIdentities = [(ParticipantIdentity(pi) if not isinstance(pi, ParticipantIdentity) else pi) for pi in dictionary.get("participantIdentities", []) if pi]
-        self.participants = [(Participant(p) if not isinstance(p, Participant) else p) for p in dictionary.get("participants", []) if p]
+        self._participantIdentities = [(ParticipantIdentity(pi) if not isinstance(pi, ParticipantIdentity) else pi) for pi in dictionary.get("participantIdentities", []) if pi]
+        self._participants = [(Participant(p) if not isinstance(p, Participant) else p) for p in dictionary.get("participants", []) if p]
+        self.participants = [ParticipantClean(p, pi) for p, pi in self._participants, self._participantIdentities]
         self.platformId = dictionary.get("platformId", "")
         self.queueType = dictionary.get("queueType", "")
         self.region = dictionary.get("region", "")
         self.season = dictionary.get("season", "")
         self.teams = [(Team(t) if not isinstance(t, Team) else t) for t in dictionary.get("teams", []) if t]
-        #val = dictionary.get("timeline", None)
-        #self.timeline = Timeline(val) if val and not isinstance(val, Timeline) else val
+        val = dictionary.get("timeline", None)
+        self.timeline = Timeline(val) if val and not isinstance(val, Timeline) else val
+        self.timelineFrameInterval = self.timeline.frameInterval
+        self.frames = self.timeline.frames
 
     @property
     def item_ids(self):
@@ -152,6 +155,30 @@ class Participant(cassiopeia.type.dto.common.CassiopeiaDto):
         self.teamId = dictionary.get("teamId", 0)
         val = dictionary.get("timeline", None)
         self.timeline = ParticipantTimeline(val) if val and not isinstance(val, ParticipantTimeline) else val
+
+
+@cassiopeia.type.core.common.inheritdocs
+class ParticipantClean(cassiopeia.type.dto.common.CassiopeiaDto):
+    """
+    Gets all item IDs contained in this object
+    """
+    def __init__(self, p, pi):
+        self.championId = p.championId
+        self.highestAchievedSeasonTier = p.highestAchievedSeasonTier
+        self.masteries = p.masteries
+        self.participantId = p.participantId
+        self.runes = p.runes
+        self.spell1Id = p.spell1Id
+        self.spell2Id = p.spell1Id
+        val = dictionary.get("stats", None)
+        self.stats = p.stats
+        self.teamId = p.teamId
+        val = dictionary.get("timeline", None)
+        self.timeline = p.timeline
+        self.matchHistoryUri = pi.player.matchHistoryUri
+        self.profileIcon = pi.player.profileIcon
+        self.summonerId = pi.player.summonerId
+        self.summonerName = pi.player.summonerName
 
 
 @cassiopeia.type.core.common.inheritdocs
@@ -540,6 +567,8 @@ class Event(cassiopeia.type.dto.common.CassiopeiaDto):
         self.pointCaptured = dictionary.get("pointCaptured", "")
         val = dictionary.get("position", None)
         self.position = Position(val) if val and not isinstance(val, Position) else val
+        self.positionX = self.position.x if self.position else None
+        self.positionY = self.position.y if self.position else None
         self.skillSlot = dictionary.get("skillSlot", 0)
         self.teamId = dictionary.get("teamId", 0)
         self.timestamp = dictionary.get("timestamp", 0)
@@ -564,6 +593,8 @@ class ParticipantFrame(cassiopeia.type.dto.common.CassiopeiaDto):
         self.participantId = dictionary.get("participantId", 0)
         val = dictionary.get("position", None)
         self.position = Position(val) if val and not isinstance(val, Position) else val
+        self.positionX = self.position.x if self.position else None
+        self.positionY = self.position.y if self.position else None
         self.teamScore = dictionary.get("teamScore", 0)
         self.totalGold = dictionary.get("totalGold", 0)
         self.xp = dictionary.get("xp", 0)
@@ -595,18 +626,22 @@ def _sa_bind_match_detail():
         mapId = sqlalchemy.Column(sqlalchemy.Integer)
         matchCreation = sqlalchemy.Column(sqlalchemy.BigInteger)
         matchDuration = sqlalchemy.Column(sqlalchemy.Integer)
-        matchId = sqlalchemy.Column(sqlalchemy.BigInteger, primary_key=True)
+        matchId = sqlalchemy.Column(sqlalchemy.BigInteger)
         matchMode = sqlalchemy.Column(sqlalchemy.String(30))
         matchType = sqlalchemy.Column(sqlalchemy.String(30))
         matchVersion = sqlalchemy.Column(sqlalchemy.String(30))
-        participantIdentities = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.ParticipantIdentity", cascade="all, delete-orphan", passive_deletes=True)
-        participants = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.Participant", cascade="all, delete-orphan", passive_deletes=True)
+        #participantIdentities = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.ParticipantIdentity", cascade="all, delete-orphan", passive_deletes=True)
+        #participants = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.Participant", cascade="all, delete-orphan", passive_deletes=True)
+        participants = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.ParticipantClean", cascade="all, delete-orphan", passive_deletes=True)
         platformId = sqlalchemy.Column(sqlalchemy.String(30))
         queueType = sqlalchemy.Column(sqlalchemy.String(30))
         region = sqlalchemy.Column(sqlalchemy.String(30))
         season = sqlalchemy.Column(sqlalchemy.String(30))
         teams = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.Team", cascade="all, delete-orphan", passive_deletes=True)
         #timeline = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.Timeline", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
+        timelineFrameInterval = sqlalchemy.Column(sqlalchemy.Integer)
+        frames = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.Frame", cascade="all, delete-orphan", passive_deletes=True)
+        _match_pk = sqlalchemy.Column(sqlalchemy.BigInteger, primary_key=True)
 
 
 def _sa_bind_participant():
@@ -626,7 +661,31 @@ def _sa_bind_participant():
         teamId = sqlalchemy.Column(sqlalchemy.Integer)
         timeline = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.ParticipantTimeline", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
         _id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-        _match_id = sqlalchemy.Column(sqlalchemy.BigInteger, sqlalchemy.ForeignKey("MatchDetail.matchId", ondelete="CASCADE"))
+        _match_pk = sqlalchemy.Column(sqlalchemy.BigInteger, sqlalchemy.ForeignKey("MatchDetail._match_pk", ondelete="CASCADE"))
+
+
+def _sa_bind_participant_clean():
+    global ParticipantClean
+
+    @cassiopeia.type.core.common.inheritdocs
+    class ParticipantClean(ParticipantClean, cassiopeia.type.dto.common.BaseDB):
+        __tablename__ = "MatchParticipantClean"
+        championId = sqlalchemy.Column(sqlalchemy.Integer)
+        highestAchievedSeasonTier = sqlalchemy.Column(sqlalchemy.String(30))
+        masteries = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.Mastery", cascade="all, delete-orphan", passive_deletes=True)
+        participantId = sqlalchemy.Column(sqlalchemy.Integer)
+        runes = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.Rune", cascade="all, delete-orphan", passive_deletes=True)
+        spell1Id = sqlalchemy.Column(sqlalchemy.Integer)
+        spell2Id = sqlalchemy.Column(sqlalchemy.Integer)
+        stats = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.ParticipantStats", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
+        teamId = sqlalchemy.Column(sqlalchemy.Integer)
+        timeline = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.ParticipantTimeline", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
+        matchHistoryUri = sqlalchemy.Column(sqlalchemy.String(50))
+        profileIcon = sqlalchemy.Column(sqlalchemy.Integer)
+        summonerId = sqlalchemy.Column(sqlalchemy.Integer)
+        summonerName = sqlalchemy.Column(sqlalchemy.String(30))
+        _id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
+        _match_pk = sqlalchemy.Column(sqlalchemy.BigInteger, sqlalchemy.ForeignKey("MatchDetail._match_pk", ondelete="CASCADE"))
 
 
 def _sa_bind_participant_identity():
@@ -638,7 +697,7 @@ def _sa_bind_participant_identity():
         participantId = sqlalchemy.Column(sqlalchemy.Integer)
         player = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.Player", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
         _id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-        _match_id = sqlalchemy.Column(sqlalchemy.BigInteger, sqlalchemy.ForeignKey("MatchDetail.matchId", ondelete="CASCADE"))
+        _match_pk = sqlalchemy.Column(sqlalchemy.BigInteger, sqlalchemy.ForeignKey("MatchDetail._match_pk", ondelete="CASCADE"))
 
 
 def _sa_bind_team():
@@ -662,7 +721,7 @@ def _sa_bind_team():
         vilemawKills = sqlalchemy.Column(sqlalchemy.Integer)
         winner = sqlalchemy.Column(sqlalchemy.Boolean)
         _id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-        _match_id = sqlalchemy.Column(sqlalchemy.BigInteger, sqlalchemy.ForeignKey("MatchDetail.matchId", ondelete="CASCADE"))
+        _match_pk = sqlalchemy.Column(sqlalchemy.BigInteger, sqlalchemy.ForeignKey("MatchDetail._match_pk", ondelete="CASCADE"))
 
 
 def _sa_bind_timeline():
@@ -674,7 +733,7 @@ def _sa_bind_timeline():
         frameInterval = sqlalchemy.Column(sqlalchemy.Integer)
         frames = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.Frame", cascade="all, delete-orphan", passive_deletes=True)
         _id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-        _match_id = sqlalchemy.Column(sqlalchemy.BigInteger, sqlalchemy.ForeignKey("MatchDetail.matchId", ondelete="CASCADE"))
+        _match_pk = sqlalchemy.Column(sqlalchemy.BigInteger, sqlalchemy.ForeignKey("MatchDetail._match_pk", ondelete="CASCADE"))
 
 
 def _sa_bind_mastery():
@@ -686,7 +745,7 @@ def _sa_bind_mastery():
         masteryId = sqlalchemy.Column(sqlalchemy.Integer)
         rank = sqlalchemy.Column(sqlalchemy.Integer)
         _id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-        _participant_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("MatchParticipant._id", ondelete="CASCADE"))
+        _participant_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("MatchParticipantClean._id", ondelete="CASCADE"))
 
 
 def _sa_bind_participant_stats():
@@ -759,7 +818,7 @@ def _sa_bind_participant_stats():
         wardsPlaced = sqlalchemy.Column(sqlalchemy.Integer)
         winner = sqlalchemy.Column(sqlalchemy.Boolean)
         _id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-        _participant_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("MatchParticipant._id", ondelete="CASCADE"))
+        _participant_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("MatchParticipantClean._id", ondelete="CASCADE"))
 
 
 def _sa_bind_participant_timeline():
@@ -796,7 +855,7 @@ def _sa_bind_participant_timeline():
         xpDiffPerMinDeltas = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.ParticipantTimelineData", primaryjoin="and_(cassiopeia.type.dto.matchlite.ParticipantTimeline._id==cassiopeia.type.dto.matchlite.ParticipantTimelineData._timeline_id, cassiopeia.type.dto.matchlite.ParticipantTimelineData._type=='xpDiffPerMinDeltas')", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
         xpPerMinDeltas = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.ParticipantTimelineData", primaryjoin="and_(cassiopeia.type.dto.matchlite.ParticipantTimeline._id==cassiopeia.type.dto.matchlite.ParticipantTimelineData._timeline_id, cassiopeia.type.dto.matchlite.ParticipantTimelineData._type=='xpPerMinDeltas')", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
         _id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-        _participant_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("MatchParticipant._id", ondelete="CASCADE"))
+        _participant_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("MatchParticipantClean._id", ondelete="CASCADE"))
 
 
 def _sa_bind_rune():
@@ -808,7 +867,7 @@ def _sa_bind_rune():
         rank = sqlalchemy.Column(sqlalchemy.Integer)
         runeId = sqlalchemy.Column(sqlalchemy.Integer)
         _id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-        _participant_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("MatchParticipant._id", ondelete="CASCADE"))
+        _participant_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("MatchParticipantClean._id", ondelete="CASCADE"))
 
 
 def _sa_bind_player():
@@ -847,7 +906,7 @@ def _sa_bind_frame():
         participantFrames = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.ParticipantFrame", collection_class=sqlalchemy.orm.collections.mapped_collection(lambda p: str(p.participantId)), cascade="all, delete-orphan", passive_deletes=True)  # OR I HAVE NO IDEA
         timestamp = sqlalchemy.Column(sqlalchemy.Integer)
         _id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
-        _timeline_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("MatchTimeline._id", ondelete="CASCADE"))
+        _match_pk = sqlalchemy.Column(sqlalchemy.BigInteger, sqlalchemy.ForeignKey("MatchDetail._match_pk", ondelete="CASCADE"))
 
 
 def _sa_bind_participant_timeline_data():
@@ -885,7 +944,9 @@ def _sa_bind_event():
         monsterType = sqlalchemy.Column(sqlalchemy.String(30))
         participantId = sqlalchemy.Column(sqlalchemy.Integer)
         pointCaptured = sqlalchemy.Column(sqlalchemy.String(30))
-        position = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.Position", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
+        #position = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.Position", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
+        positionX = sqlalchemy.Column(sqlalchemy.Integer)
+        positionY = sqlalchemy.Column(sqlalchemy.Integer)
         skillSlot = sqlalchemy.Column(sqlalchemy.Integer)
         teamId = sqlalchemy.Column(sqlalchemy.Integer)
         timestamp = sqlalchemy.Column(sqlalchemy.Integer)
@@ -908,7 +969,9 @@ def _sa_bind_participant_frame():
         level = sqlalchemy.Column(sqlalchemy.Integer)
         minionsKilled = sqlalchemy.Column(sqlalchemy.Integer)
         participantId = sqlalchemy.Column(sqlalchemy.Integer)
-        position = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.Position", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
+        #position = sqlalchemy.orm.relationship("cassiopeia.type.dto.matchlite.Position", uselist=False, cascade="all, delete-orphan", passive_deletes=True)
+        positionX = sqlalchemy.Column(sqlalchemy.Integer)
+        positionY = sqlalchemy.Column(sqlalchemy.Integer)
         teamScore = sqlalchemy.Column(sqlalchemy.Integer)
         totalGold = sqlalchemy.Column(sqlalchemy.Integer)
         xp = sqlalchemy.Column(sqlalchemy.Integer)
@@ -931,18 +994,19 @@ def _sa_bind_position():
 
 def _sa_bind_all():
     _sa_bind_match_detail()
-    _sa_bind_participant()
-    _sa_bind_participant_identity()
+    #_sa_bind_participant()
+    _sa_bind_participant_clean()
+    #_sa_bind_participant_identity()
     _sa_bind_team()
     #_sa_bind_timeline()
     _sa_bind_mastery()
     _sa_bind_participant_stats()
     _sa_bind_participant_timeline()
     _sa_bind_rune()
-    _sa_bind_player()
+    #_sa_bind_player()
     _sa_bind_banned_champion()
-    #_sa_bind_frame()
+    _sa_bind_frame()
     _sa_bind_participant_timeline_data()
-    #_sa_bind_event()
-    #_sa_bind_participant_frame()
+    _sa_bind_event()
+    _sa_bind_participant_frame()
     #_sa_bind_position()

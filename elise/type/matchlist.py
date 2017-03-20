@@ -19,3 +19,4 @@ class MatchlistTransportTokenSummoner(object):
     def __init__(self, token):
         self.summonerId = token.summonerId
         self.timestamp = token.timestamp
+        self.matchCount = len(token.matchrefs)
