@@ -20,6 +20,24 @@
             ]
         },
         {
+            "name": "jsoninserter (KR)",
+            "type": "python",
+            "request": "launch",
+            "stopOnEntry": true,
+            "pythonPath": "/Users/bruno/Dropbox/Code/elise-minimalist/venv-elise/bin/python",
+            "program": "${workspaceRoot}/tools/jsoninserter.py",
+            "cwd": "/Users/bruno/Dropbox/Code/elise-minimalist",
+            "args": [
+                "-r",
+                "KR"
+            ],
+            "debugOptions": [
+                "WaitOnAbnormalExit",
+                "WaitOnNormalExit",
+                "RedirectOutput"
+            ]
+        },
+        {
             "name": "PySpark",
             "type": "python",
             "request": "launch",
