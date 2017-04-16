@@ -29,7 +29,7 @@ class DispatchMatchThread(threading.Thread):
 
     REQUEST_MATCH_QUEUE_SIZE = 600
     REQUEST_MATCH_QUEUE_THRESHOLD = 500
-    FLUSH_MATCHLISTS = 3
+    FLUSH_MATCHLISTS = 20
     SLEEP_TIME = 5
 
     def __init__(self, pipe, dbd_match_filename, max_match_id=None):
@@ -201,8 +201,8 @@ class DispatchMatchThread(threading.Thread):
 
 class DispatchMatchlistThread(threading.Thread):
 
-    REQUEST_MATCHLIST_QUEUE_SIZE = 100
-    REQUEST_MATCHLIST_QUEUE_THRESHOLD = 80
+    REQUEST_MATCHLIST_QUEUE_SIZE = 1000
+    REQUEST_MATCHLIST_QUEUE_THRESHOLD = 800
     SLEEP_TIME = 5
 
     def __init__(self, pipe, dbd_matchlist_filename, cold_start=False):
