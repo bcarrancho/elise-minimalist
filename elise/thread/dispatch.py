@@ -32,13 +32,14 @@ class DispatchMatchThread(threading.Thread):
     FLUSH_MATCHLISTS = 3
     SLEEP_TIME = 5
 
-    def __init__(self, pipe, dbd_match_filename):
+    def __init__(self, pipe, dbd_match_filename, max_match_id=None):
         logging.debug("Creating dispatch match thread")
         threading.Thread.__init__(self, daemon=False, name="DispatchMatch")
 
         self.pipe = pipe
         self.dbd_match_filename = dbd_match_filename
         self.flag_exit = threading.Event()
+        self.max_match_id = max_match_id
 
         logging.debug("Initializing dispatch match thread data structures")
         conn_dbd_match = sqlite3.connect(self.dbd_match_filename)
@@ -52,7 +53,36 @@ class DispatchMatchThread(threading.Thread):
     
     def dispatch(self, conn, n):
         start_time = time.time()
-        c = conn.execute('SELECT "matchId" FROM "MatchDiscovered" WHERE "matchId" NOT IN (SELECT "matchId" FROM "MatchQueued") AND "matchId" NOT IN (SELECT "matchId" FROM "MatchFlushed") ORDER BY "matchId" DESC LIMIT (?);', (n,))
+        if self.max_match_id is None:
+            query = '''
+                SELECT "matchId"
+                FROM "MatchDiscovered"
+                WHERE "matchId" NOT IN
+                    (SELECT "matchId"
+                    FROM "MatchQueued")
+                AND "matchId" NOT IN
+                    (SELECT "matchId"
+                    FROM "MatchFlushed")
+                ORDER BY "matchId" DESC
+                LIMIT (?);
+            '''
+            c = conn.execute(query, (n,))
+        else:
+            query = '''
+                SELECT "matchId"
+                FROM "MatchDiscovered"
+                WHERE "matchId" NOT IN
+                    (SELECT "matchId"
+                    FROM "MatchQueued")
+                AND "matchId" NOT IN
+                    (SELECT "matchId"
+                    FROM "MatchFlushed")
+                AND "matchId" < (?)
+                ORDER BY "matchId" DESC
+                LIMIT (?);
+            '''
+            c = conn.execute(query, (self.max_match_id, n))
+
         dispatched_matches = [match_id[0] for match_id in c.fetchall()]
         count = len(dispatched_matches)
         if count > 0:

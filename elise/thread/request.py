@@ -21,7 +21,7 @@ class RequestMode(enum.Enum):
 class RequestThread(threading.Thread):
 
     MATCH_BATCH = 10
-    MATCHLIST_BATCH = 3
+    MATCHLIST_BATCH = 5
     MATCHLIST_MAX_ELAPSED_DAYS = 0
 
     def __init__(self, pipe, include_timeline=True, num_matches=0, begin_index=0, begin_time=0, end_time=0, champion_ids=None, ranked_queues=None, seasons=None, cold_start=False):

@@ -21,19 +21,6 @@ import elise.db.discovery
 VALID_REGIONS = ("BR", "EUNE", "EUW", "JP", "KR", "LAN", "LAS", "NA", "OCE", "RU", "TR")
 VALID_QUEUES = ("RANKED_FLEX_SR", "RANKED_SOLO_5x5", "RANKED_TEAM_3x3", "RANKED_TEAM_5x5", "TEAM_BUILDER_DRAFT_RANKED_5x5", "TEAM_BUILDER_RANKED_SOLO")
 VALID_SEASONS = ("PRESEASON3", "SEASON3", "PRESEASON2014", "SEASON2014", "PRESEASON2015", "SEASON2015", "PRESEASON2016", "SEASON2016", "PRESEASON2017", "SEASON2017")
-max_match_id = {
-    "BR": 1061231503,
-    "EUNE": 1683960449,
-    "EUW": 3140516216,
-    "JP": 145361272,
-    "KR": 2790127677,
-    "LAN": 383275472,
-    "LAS": 419621789,
-    "NA": 2476153632,
-    "OCE": 170131554,
-    "RU": 132569994,
-    "TR": 535704451
-}
 
 
 def main(parameters):
@@ -79,7 +66,7 @@ def main(parameters):
     thread_dispatch_matchlist = elise.thread.dispatch.DispatchMatchlistThread(pipe, str(filename_dbd_matchlist), cold_start=cold_start)
     thread_dispatch_matchlist.start()
 
-    thread_dispatch_match = elise.thread.dispatch.DispatchMatchThread(pipe, str(filename_dbd_match), max_match_id[region.upper()])
+    thread_dispatch_match = elise.thread.dispatch.DispatchMatchThread(pipe, str(filename_dbd_match))
     thread_dispatch_match.start()
 
     thread_flush_match = elise.thread.flush.FlushMatchThread(pipe, folder_json_match)
