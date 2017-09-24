@@ -1,2 +1,4 @@
 venv-elise/
 .vscode/
+.DS_Store
+*.pyc
