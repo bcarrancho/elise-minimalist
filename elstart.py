@@ -17,6 +17,7 @@ import elise.thread.flush
 import elise.api.translation
 import elise.db.discovery
 
+# Test
 
 VALID_REGIONS = ("BR", "EUNE", "EUW", "JP", "KR", "LAN", "LAS", "NA", "OCE", "RU", "TR")
 VALID_QUEUES = ("RANKED_FLEX_SR", "RANKED_SOLO_5x5", "RANKED_TEAM_3x3", "RANKED_TEAM_5x5", "TEAM_BUILDER_DRAFT_RANKED_5x5", "TEAM_BUILDER_RANKED_SOLO")
